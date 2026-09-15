@@ -1,0 +1,8 @@
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.wav
+backend/analyzer_backup.py
+*.pyc
+.env
+.git

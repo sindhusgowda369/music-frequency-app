@@ -1,0 +1,2164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Pulse — Music Intelligence</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0b0b0b;
+            --panel: #151515;
+            --panel-2: #191919;
+            --border: #292929;
+            --text: #ffffff;
+            --muted: #888;
+            --orange: #ff6b00;
+            --orange-light: #ff8126;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding-bottom: 100px;
+        }
+
+        button {
+            font-family: inherit;
+        }
+
+        /* =========================
+           LAYOUT
+        ========================== */
+
+        .app {
+            min-height: 100vh;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================== */
+
+        .sidebar {
+            width: 230px;
+            background: #111;
+            border-right: 1px solid var(--border);
+            padding: 28px 18px;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: bold;
+            margin-bottom: 40px;
+        }
+
+        .logo span {
+            color: var(--orange);
+        }
+
+        .nav-title {
+            color: #666;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 25px 12px 10px;
+        }
+
+        .nav-item {
+            display: block;
+            padding: 12px;
+            margin-bottom: 4px;
+            border-radius: 8px;
+            color: #aaa;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .nav-item:hover {
+            background: #1c1c1c;
+            color: white;
+        }
+
+        .nav-item.active {
+            background: var(--orange);
+            color: white;
+        }
+
+        /* =========================
+           MAIN
+        ========================== */
+
+        .main {
+            margin-left: 230px;
+            width: calc(100% - 230px);
+            padding: 35px 45px 70px;
+        }
+
+        /* =========================
+           HEADER
+        ========================== */
+
+        .top-header {
+            margin-bottom: 25px;
+        }
+
+        .top-header h1 {
+            font-size: 30px;
+        }
+
+        .top-header p {
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        /* =========================
+           SEARCH
+        ========================== */
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .search-input-wrap {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 16px 45px 16px 18px;
+            background: #171717;
+            border: 1px solid #303030;
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: var(--orange);
+        }
+
+        .clear-search {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            color: #777;
+            padding: 5px 9px;
+            font-size: 20px;
+            display: none;
+        }
+
+        .clear-search:hover {
+            background: transparent;
+            color: white;
+        }
+
+        .search-button {
+            padding: 15px 25px;
+            background: var(--orange);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .search-button:hover {
+            background: var(--orange-light);
+        }
+
+        /* =========================
+           LIVE SEARCH
+        ========================== */
+
+        .search-status {
+            color: #777;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        /* =========================
+           SECTION
+        ========================== */
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .section h2 {
+            font-size: 21px;
+        }
+
+        .section-subtitle {
+            color: #777;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        /* =========================
+           CATEGORY CARDS
+        ========================== */
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            padding: 20px;
+            min-height: 105px;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            border-color: var(--orange);
+            background: #1b1b1b;
+        }
+
+        .card-icon {
+            font-size: 25px;
+            margin-bottom: 10px;
+        }
+
+        .card h3 {
+            font-size: 15px;
+        }
+
+        .card p {
+            color: #777;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        /* =========================
+           SEARCH RESULTS
+        ========================== */
+
+        #searchSection {
+            display: none;
+            margin-bottom: 40px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .results-header h2 {
+            font-size: 21px;
+        }
+
+        .results-count {
+            color: #777;
+            font-size: 13px;
+        }
+
+        .song-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .song-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 15px;
+            transition: .2s;
+        }
+
+        .song-card:hover {
+            background: #1b1b1b;
+            border-color: #444;
+        }
+
+        .song-art {
+            width: 58px;
+            height: 58px;
+            border-radius: 7px;
+            object-fit: cover;
+            background: #222;
+            flex-shrink: 0;
+        }
+
+        .song-info {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .song-title {
+            font-weight: bold;
+            font-size: 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .song-artist {
+            color: #999;
+            font-size: 13px;
+            margin-top: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .song-album {
+            color: #666;
+            font-size: 12px;
+            margin-top: 3px;
+        }
+
+        .song-actions {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .icon-button {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            padding: 0;
+            background: #222;
+            color: white;
+            border: 1px solid #333;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-button:hover {
+            background: var(--orange);
+            border-color: var(--orange);
+        }
+
+        .play-song-button {
+            background: var(--orange);
+            border-color: var(--orange);
+        }
+
+        /* =========================
+           SONG DETAIL
+        ========================== */
+
+        #songDetail {
+            display: none;
+            margin-bottom: 40px;
+        }
+
+        .detail-hero {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+            background: linear-gradient(135deg, #191919, #101010);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .detail-art {
+            width: 180px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 12px;
+            background: #222;
+        }
+
+        .detail-info {
+            flex: 1;
+        }
+
+        .detail-label {
+            color: var(--orange);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 11px;
+            margin-bottom: 8px;
+        }
+
+        .detail-title {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .detail-artist {
+            color: #aaa;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .detail-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .meta-pill {
+            background: #242424;
+            color: #bbb;
+            padding: 7px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .detail-play {
+            margin-top: 18px;
+            padding: 12px 20px;
+        }
+
+        /* =========================
+           DETAIL TABS
+        ========================== */
+
+        .detail-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .detail-tab {
+            background: transparent;
+            color: #888;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .detail-tab:hover {
+            color: white;
+            background: #181818;
+        }
+
+        .detail-tab.active {
+            color: white;
+            background: var(--orange);
+        }
+
+        .detail-panel {
+            display: none;
+        }
+
+        .detail-panel.active {
+            display: block;
+        }
+
+        .info-box {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 22px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h3 {
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            color: #999;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        /* =========================
+           FREQUENCY
+        ========================== */
+
+        .frequency-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .frequency-stat {
+            background: #101010;
+            border: 1px solid #292929;
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .frequency-stat span {
+            display: block;
+            color: #777;
+            font-size: 12px;
+            margin-bottom: 7px;
+        }
+
+        .frequency-stat strong {
+            font-size: 20px;
+        }
+
+        /* =========================
+           RECOMMENDATIONS
+        ========================== */
+
+        .recommendation-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+
+        .recommendation-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            padding: 12px;
+            cursor: pointer;
+        }
+
+        .recommendation-card:hover {
+            border-color: var(--orange);
+        }
+
+        .recommendation-card img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 9px;
+            margin-bottom: 10px;
+        }
+
+        .recommendation-card strong {
+            display: block;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .recommendation-card span {
+            display: block;
+            color: #777;
+            font-size: 12px;
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* =========================
+           ANALYZER
+        ========================== */
+
+        .upload-card,
+        #result {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .upload-card h2 {
+            margin-bottom: 8px;
+        }
+
+        .upload-card p {
+            color: #888;
+            margin-bottom: 18px;
+            line-height: 1.5;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 14px;
+            background: #0f0f0f;
+            border: 1px solid #303030;
+            border-radius: 10px;
+            color: #aaa;
+            margin-bottom: 15px;
+        }
+
+        /* =========================
+           MERGE
+        ========================== */
+
+        #mergeModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .82);
+            z-index: 500;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .merge-box {
+            width: min(800px, 100%);
+            max-height: 90vh;
+            overflow-y: auto;
+            background: #151515;
+            border: 1px solid #333;
+            border-radius: 18px;
+            padding: 25px;
+        }
+
+        .merge-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .merge-header h2 {
+            font-size: 22px;
+        }
+
+        .close-modal {
+            background: #222;
+            border: 1px solid #333;
+            padding: 8px 12px;
+        }
+
+        .merge-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .merge-option {
+            background: #1d1d1d;
+            border: 1px solid #333;
+            color: #bbb;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .merge-option:hover,
+        .merge-option.active {
+            border-color: var(--orange);
+            color: white;
+        }
+
+        .merge-option strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .merge-option span {
+            font-size: 12px;
+            color: #777;
+        }
+
+        .merge-song {
+            background: #101010;
+            border: 1px solid #292929;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+
+        .merge-song h3 {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .merge-song input {
+            width: 100%;
+            padding: 12px;
+            background: #181818;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: white;
+            outline: none;
+        }
+
+        .merge-song-results {
+            margin-top: 10px;
+        }
+
+        .merge-result {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .merge-result:hover {
+            background: #1c1c1c;
+        }
+
+        .merge-result img {
+            width: 42px;
+            height: 42px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .merge-result div {
+            min-width: 0;
+        }
+
+        .merge-result strong,
+        .merge-result span {
+            display: block;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .merge-result span {
+            color: #777;
+            font-size: 12px;
+            margin-top: 3px;
+        }
+
+        .merge-selected {
+            color: var(--orange);
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        /* =========================
+           QUEUE
+        ========================== */
+
+        #queuePanel {
+            display: none;
+            position: fixed;
+            right: 20px;
+            bottom: 95px;
+            width: 330px;
+            max-height: 450px;
+            overflow-y: auto;
+            background: #151515;
+            border: 1px solid #333;
+            border-radius: 15px;
+            z-index: 300;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, .5);
+        }
+
+        .queue-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            border-bottom: 1px solid #292929;
+        }
+
+        .queue-item {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        .queue-item:hover {
+            background: #1d1d1d;
+        }
+
+        .queue-item img {
+            width: 42px;
+            height: 42px;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+
+        .queue-item div {
+            min-width: 0;
+        }
+
+        .queue-item strong,
+        .queue-item span {
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .queue-item span {
+            color: #777;
+            font-size: 12px;
+            margin-top: 3px;
+        }
+
+        /* =========================
+           NOW PLAYING BAR
+        ========================== */
+
+        #playerBar {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 82px;
+            background: rgba(18, 18, 18, .98);
+            border-top: 1px solid #303030;
+            z-index: 400;
+            display: none;
+            align-items: center;
+            padding: 10px 20px;
+            gap: 20px;
+        }
+
+        .player-song {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            width: 260px;
+            min-width: 180px;
+        }
+
+        .player-art {
+            width: 55px;
+            height: 55px;
+            object-fit: cover;
+            border-radius: 6px;
+            background: #222;
+        }
+
+        .player-text {
+            min-width: 0;
+        }
+
+        .player-title,
+        .player-artist {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .player-title {
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .player-artist {
+            color: #777;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .player-center {
+            flex: 1;
+            max-width: 700px;
+            margin: auto;
+        }
+
+        .player-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .player-control {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            border: none;
+            background: transparent;
+            color: #bbb;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .player-control:hover {
+            color: white;
+            background: #222;
+        }
+
+        .player-play {
+            width: 35px;
+            height: 35px;
+            background: white;
+            color: black;
+        }
+
+        .player-play:hover {
+            background: white;
+            color: black;
+        }
+
+        .progress-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .time {
+            color: #777;
+            font-size: 10px;
+            width: 35px;
+        }
+
+        .time:last-child {
+            text-align: right;
+        }
+
+        #progressBar {
+            flex: 1;
+            accent-color: var(--orange);
+            cursor: pointer;
+        }
+
+        .player-right {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            width: 180px;
+            justify-content: flex-end;
+        }
+
+        .volume {
+            width: 85px;
+            accent-color: var(--orange);
+        }
+
+        /* =========================
+           TOAST
+        ========================== */
+
+        #toast {
+            position: fixed;
+            bottom: 105px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #222;
+            border: 1px solid #444;
+            padding: 10px 16px;
+            border-radius: 8px;
+            color: white;
+            font-size: 13px;
+            display: none;
+            z-index: 700;
+        }
+
+        /* =========================
+           LOADING
+        ========================== */
+
+        .loading {
+            color: #888;
+            padding: 20px 0;
+        }
+
+        .empty {
+            color: #666;
+            padding: 20px 0;
+        }
+
+        /* =========================
+           MOBILE
+        ========================== */
+
+        @media (max-width: 1000px) {
+            .cards {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .recommendation-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .player-song {
+                width: 210px;
+            }
+
+            .player-right {
+                width: 130px;
+            }
+
+            .volume {
+                width: 65px;
+            }
+        }
+
+        @media (max-width: 850px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                margin-left: 0;
+                width: 100%;
+                padding: 25px 20px 100px;
+            }
+
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .recommendation-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .frequency-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-hero {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .detail-art {
+                width: 150px;
+                height: 150px;
+            }
+
+            .player-song {
+                width: 170px;
+            }
+
+            .player-right {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding-bottom: 115px;
+            }
+
+            .top-header h1 {
+                font-size: 25px;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .search-button {
+                width: 100%;
+            }
+
+            .cards {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .song-card {
+                padding: 10px;
+            }
+
+            .song-album {
+                display: none;
+            }
+
+            .song-actions .more-song {
+                display: none;
+            }
+
+            .detail-title {
+                font-size: 25px;
+            }
+
+            .merge-options {
+                grid-template-columns: 1fr;
+            }
+
+            #playerBar {
+                height: 105px;
+                padding: 8px 12px;
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+
+            .player-song {
+                width: calc(100% - 55px);
+            }
+
+            .player-center {
+                width: 100%;
+                max-width: none;
+                order: 3;
+            }
+
+            .player-controls {
+                position: absolute;
+                right: 12px;
+                top: 18px;
+            }
+
+            .player-art {
+                width: 48px;
+                height: 48px;
+            }
+
+            .queuePanel {
+                right: 10px;
+                left: 10px;
+                width: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- =========================
+             SIDEBAR
+        ========================== -->
+
+        <aside class="sidebar">
+
+            <div class="logo">
+                <span>●</span> PULSE
+            </div>
+
+            <div class="nav-item active" data-nav="home">
+                🏠 Home
+            </div>
+
+            <div class="nav-item" data-nav="search">
+                🔎 Search
+            </div>
+
+            <div class="nav-item" data-nav="liked">
+                ❤️ Liked Songs
+            </div>
+
+            <div class="nav-item" id="queueNav">
+                📋 Your Queue
+            </div>
+
+            <div class="nav-title">
+                Discover
+            </div>
+
+            <div class="nav-item" data-scroll="genres">
+                🎵 Genres
+            </div>
+
+            <div class="nav-item" data-scroll="moods">
+                🧠 Mood
+            </div>
+
+            <div class="nav-item" data-scroll="energy">
+                ⚡ Energy
+            </div>
+
+            <div class="nav-title">
+                Analyze
+            </div>
+
+            <div class="nav-item" data-scroll="analyzer">
+                🎚️ Frequency
+            </div>
+
+            <div class="nav-item" data-scroll="psychology">
+                🧬 Music Psychology
+            </div>
+
+        </aside>
+
+
+        <!-- =========================
+             MAIN
+        ========================== -->
+
+        <main class="main">
+
+            <!-- HEADER -->
+
+            <div class="top-header">
+
+                <h1>Good evening 👋</h1>
+
+                <p>
+                    Discover music. Understand sound.
+                </p>
+
+            </div>
+
+
+            <!-- =========================
+                 SEARCH
+            ========================== -->
+
+            <section class="search-box">
+
+                <div class="search-input-wrap">
+
+                    <input
+                        type="text"
+                        id="songSearch"
+                        placeholder="Search songs, artists or movies..."
+                        autocomplete="off"
+                    >
+
+                    <button
+                        class="clear-search"
+                        id="clearSearch"
+                        type="button"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+                <button
+                    class="search-button"
+                    id="searchButton"
+                    type="button"
+                >
+                    Search
+                </button>
+
+            </section>
+
+            <div
+                id="searchStatus"
+                class="search-status"
+            ></div>
+
+
+            <!-- =========================
+                 SEARCH RESULTS
+            ========================== -->
+
+            <section id="searchSection">
+
+                <div class="results-header">
+
+                    <div>
+                        <h2 id="resultsTitle">
+                            Search Results
+                        </h2>
+                    </div>
+
+                    <span
+                        id="resultsCount"
+                        class="results-count"
+                    ></span>
+
+                </div>
+
+                <div
+                    id="searchResults"
+                    class="song-list"
+                ></div>
+
+            </section>
+
+
+            <!-- =========================
+                 SONG DETAIL
+            ========================== -->
+
+            <section id="songDetail">
+
+                <div class="detail-hero">
+
+                    <img
+                        id="detailArt"
+                        class="detail-art"
+                        src=""
+                        alt="Album artwork"
+                    >
+
+                    <div class="detail-info">
+
+                        <div class="detail-label">
+                            Now Exploring
+                        </div>
+
+                        <h1
+                            id="detailTitle"
+                            class="detail-title"
+                        ></h1>
+
+                        <div
+                            id="detailArtist"
+                            class="detail-artist"
+                        ></div>
+
+                        <div
+                            id="detailMeta"
+                            class="detail-meta"
+                        ></div>
+
+                        <button
+                            id="detailPlay"
+                            class="detail-play"
+                            type="button"
+                        >
+                            ▶ Play
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="detail-tabs">
+
+                    <button
+                        class="detail-tab active"
+                        data-tab="artistPanel"
+                    >
+                        🎤 Artist
+                    </button>
+
+                    <button
+                        class="detail-tab"
+                        data-tab="relatedPanel"
+                    >
+                        🎵 Related / Mood
+                    </button>
+
+                    <button
+                        class="detail-tab"
+                        data-tab="frequencyPanel"
+                    >
+                        🎚️ Frequency
+                    </button>
+
+                </div>
+
+
+                <!-- ARTIST -->
+
+                <div
+                    id="artistPanel"
+                    class="detail-panel active"
+                >
+
+                    <div class="info-box">
+
+                        <h3 id="artistHeading">
+                            Artist
+                        </h3>
+
+                        <p id="artistDescription">
+                            Explore songs from this artist.
+                        </p>
+
+                    </div>
+
+                    <div class="recommendation-grid" id="artistSongs"></div>
+
+                </div>
+
+
+                <!-- RELATED / MOOD -->
+
+                <div
+                    id="relatedPanel"
+                    class="detail-panel"
+                >
+
+                    <div class="info-box">
+
+                        <h3>Related Music</h3>
+
+                        <p>
+                            Songs with related genre, mood or
+                            listening characteristics.
+                        </p>
+
+                    </div>
+
+                    <div
+                        class="recommendation-grid"
+                        id="relatedSongs"
+                    ></div>
+
+                </div>
+
+
+                <!-- FREQUENCY -->
+
+                <div
+                    id="frequencyPanel"
+                    class="detail-panel"
+                >
+
+                    <div class="info-box">
+
+                        <h3>Frequency Analysis</h3>
+
+                        <p id="frequencyExplanation">
+                            Frequency analysis will appear when
+                            usable audio is available for analysis.
+                        </p>
+
+                        <div class="frequency-grid">
+
+                            <div class="frequency-stat">
+                                <span>
+                                    Estimated Tuning
+                                </span>
+                                <strong id="detailTuning">
+                                    —
+                                </strong>
+                            </div>
+
+                            <div class="frequency-stat">
+                                <span>
+                                    Dominant Frequency
+                                </span>
+                                <strong id="detailDominant">
+                                    —
+                                </strong>
+                            </div>
+
+                            <div class="frequency-stat">
+                                <span>
+                                    Energy
+                                </span>
+                                <strong id="detailEnergy">
+                                    —
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="info-box">
+
+                        <h3>
+                            What might this music influence?
+                        </h3>
+
+                        <p id="musicEffectText">
+                            Music can influence perceived mood,
+                            arousal and attention. These effects
+                            depend on the complete musical experience,
+                            not on one frequency alone.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================
+                 GENRES
+            ========================== -->
+
+            <section
+                class="section"
+                id="genres"
+            >
+
+                <div class="section-header">
+
+                    <div>
+                        <h2>Explore by Genre</h2>
+                        <p class="section-subtitle">
+                            Find music by style.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="cards">
+
+                    <div
+                        class="card"
+                        data-category="genre"
+                        data-query="Pop"
+                    >
+                        <div class="card-icon">🎤</div>
+                        <h3>Pop</h3>
+                        <p>Popular music</p>
+                    </div>
+
+                    <div
+                        class="card"
+                        data-category="genre"
+                        data-query="Hip-Hop"
+                    >
+                        <div class="card-icon">🔥</div>
+                        <h3>Hip-Hop</h3>
+                        <p>Rhythm & flow</p>
+                    </div>
+
+                    <div
+                        class="card"
+                        data-category="genre"
+                        data-query="K-Pop"
+                    >
+                        <div class="card-icon">💜</div>
+                        <h3>K-Pop</h3>
+                        <p>Korean music</p>
+                    </div>
+
+                    <div
+                        class="card"
+                        data-category="genre"
+                        data-query="Rock"
+                    >
+                        <div class="card-icon">🎸</div>
+                        <h3>Rock</h3>
+                        <p>Guitars & energy</p>
+                    </div>
+
+                    <div
+                        class="card"
+                        data-category="genre"
+                        data-query="Jazz"
+                    >
+                        <div class="card-icon">🎷</div>
+                        <h3>Jazz</h3>
+                        <p>Improvisation</p>
+                    </div>
+
+                    <div
+                        class="card"
+                        data-category="genre"
+                        data-query="Instrumental"
+                    >
+                        <div class="card-icon">🎹</div>
+                        <h3>Instrumental</h3>
+                        <p>Pure sound</p>
+                    </div>
+
+                    <div
+                        class="card"
+                        data-category="genre"
+                        data-query="Bollywood"
+                    >
+                        <div class="card-icon">🇮🇳</div>
+                        <h3>Bollywood</h3>
+                        <p>Indian cinema</p>
+                    </div>
+
+                    <div
+                        class="card"
+                        data-category="genre"
+                        data-query="Lo-fi"
+                    >
+                        <div class="card-icon">🌙</div>
+                        <h3>Lo-fi</h3>
+                        <p>Relax & focus</p>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================
+                 MOOD
+            ========================== -->
+
+            <section
+                class="section"
+                id="moods"
+            >
+
+                <div class="section-header">
+
+                    <div>
+                        <h2>Choose Your Mood</h2>
+                        <p class="section-subtitle">
+                            Discover music that fits how you feel.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="cards">
+
+                    <div
+                        class="card"
+                        data-category="mood"
+                        data-query="Happy"
+                    >
+                        <div class="card-icon">😊</div>
+                        <h3>Happy</h3>
+                        <p>Bright & uplifting</p>
+                    </div>
+
+                    <div
+                        class="card"
+                        data-category="mood"
+                        data-query="Calm"
+                    >
+                        <div class="card-icon">🌿</div>
+                        <h3>Calm</h3>
+                        <p>Relaxed listening</p>
+                    </div>
+
+                    <div
+                        class="card"
+                        data-category="mood"
+                        data-query="Sad"
+                    >
+                        <div class="card-icon">💔</div>
+                        <h3>Sad</h3>
+                        <p>Emotional music</p>
+                    </div>
+
+                    <div
+                        class="card"
+                        data-category="mood"
+                        data-query="Romantic"
+                    >
+                        <div class="card-icon">❤️</div>
+                        <h3>Romantic</h3>
+                        <p>Love & connection</p>
+                    </div>
+
+                    <div
+                        class="card"
+                        data-category="mood"
+                        data-query="Motivational"
+                    >
+                        <div class="card-icon">🔥</div>
+                        <h3>Motivational</h3>
+                        <p>Drive & confidence</p>
+                    </div>
+
+                    <div
+                        class="card"
+                        data-category="mood"
+                        data-query="Peaceful"
+                    >
+                        <div class="card-icon">🕊️</div>
+                        <h3>Peaceful</h3>
+                        <p>Gentle listening</p>
+                    </div>
+
+                    <div
+                        class="card"
+                        data-category="mood"
+                        data-query="Nostalgic"
+                    >
+                        <div class="card-icon">🕰️</div>
+                        <h3>Nostalgic</h3>
+                        <p>Memories & emotion</p>
+                    </div>
+
+                    <div
+                        class="card"
+                        data-category="mood"
+                        data-query="Dreamy"
+                    >
+                        <div class="card-icon">🌌</div>
+                        <h3>Dreamy</h3>
+                        <p>Atmospheric sounds</p>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================
+                 ENERGY
+            ========================== -->
+
+            <section
+                class="section"
+                id="energy"
+            >
+
+                <div class="section-header">
+
+                    <div>
+                        <h2>Choose Your Energy</h2>
+                        <p class="section-subtitle">
+                            Find music for what you want to do.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="cards">
+
+                    <div
+                        class="card"
+                        data-category="energy"
+                        data-query="slow relaxing music"
+                    >
+                        <div class="card-icon">🌙</div>
+                        <h3>Low Energy</h3>
+                        <p>Slow & gentle</p>
+                    </div>
+
+                    <div
+                        class="card"
+                        data-category="energy"
+                        data-query="medium energy music"
+                    >
+                        <div class="card-icon">⚖️</div>
+                        <h3>Medium</h3>
+                        <p>Balanced</p>
+                    </div>
+
+                    <div
+                        class="card"
+                        data-category="energy"
+                        data-query="high energy music"
+                    >
+                        <div class="card-icon">⚡</div>
+                        <h3>High Energy</h3>
+                        <p>Powerful & intense</p>
+                    </div>
+
+                    <div
+                        class="card"
+                        data-category="energy"
+                        data-query="workout music"
+                    >
+                        <div class="card-icon">🏋️</div>
+                        <h3>Workout</h3>
+                        <p>Maximum drive</p>
+                    </div>
+
+                    <div
+                        class="card"
+                        data-category="energy"
+                        data-query="study instrumental focus"
+                    >
+                        <div class="card-icon">📚</div>
+                        <h3>Focus</h3>
+                        <p>Study & concentration</p>
+                    </div>
+
+                    <div
+                        class="card"
+                        data-category="energy"
+                        data-query="sleep relaxing music"
+                    >
+                        <div class="card-icon">😴</div>
+                        <h3>Sleep</h3>
+                        <p>Wind down</p>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================
+                 ANALYZER
+            ========================== -->
+
+            <section
+                class="upload-card"
+                id="analyzer"
+            >
+
+                <h2>🎚️ Analyze Your Own Song</h2>
+
+                <p>
+                    Upload a song to explore its frequency,
+                    tuning, energy and estimated mood.
+                </p>
+
+                <input
+                    type="file"
+                    id="audioFile"
+                    accept="audio/*,.mpeg,.mp3,.wav,.m4a"
+                >
+
+                <button
+                    id="analyzeButton"
+                    type="button"
+                >
+                    Analyze Song
+                </button>
+
+            </section>
+
+
+            <!-- RESULT -->
+
+            <section id="result">
+
+                <p style="color:#888;">
+                    Your analysis will appear here.
+                </p>
+
+            </section>
+
+
+            <!-- =========================
+                 PSYCHOLOGY
+            ========================== -->
+
+            <section
+                class="section"
+                id="psychology"
+            >
+
+                <div class="info-box">
+
+                    <h2>🧬 Music Psychology</h2>
+
+                    <p style="margin-top:10px;">
+                        Music can influence emotional state,
+                        arousal, attention and perceived energy.
+                        These effects depend on factors such as
+                        tempo, rhythm, timbre, loudness, harmony,
+                        familiarity and personal associations.
+                    </p>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- =========================
+         QUEUE
+    ========================== -->
+
+    <div id="queuePanel">
+
+        <div class="queue-header">
+
+            <strong>Your Queue</strong>
+
+            <button
+                id="closeQueue"
+                class="icon-button"
+                type="button"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <div id="queueList"></div>
+
+    </div>
+
+
+    <!-- =========================
+         MERGE MODAL
+    ========================== -->
+
+    <div id="mergeModal">
+
+        <div class="merge-box">
+
+            <div class="merge-header">
+
+                <h2>🎛️ Merge Songs</h2>
+
+                <button
+                    id="closeMerge"
+                    class="close-modal"
+                    type="button"
+                >
+                    ×
+                </button>
+
+            </div>
+
+            <div class="merge-options">
+
+                <button
+                    class="merge-option active"
+                    data-mode="half"
+                    type="button"
+                >
+                    <strong>1. Half + Half</strong>
+                    <span>
+                        Song A music + Song B music
+                    </span>
+                </button>
+
+                <button
+                    class="merge-option"
+                    data-mode="musicLyrics"
+                    type="button"
+                >
+                    <strong>2. Music + Lyrics</strong>
+                    <span>
+                        Song A music + Song B lyrics
+                    </span>
+                </button>
+
+                <button
+                    class="merge-option"
+                    data-mode="lyricsMusic"
+                    type="button"
+                >
+                    <strong>3. Lyrics + Music</strong>
+                    <span>
+                        Song A lyrics + both songs' music
+                    </span>
+                </button>
+
+            </div>
+
+
+            <div class="merge-song">
+
+                <h3>Song A</h3>
+
+                <input
+                    id="mergeSearchA"
+                    type="text"
+                    placeholder="Search first song..."
+                >
+
+                <div
+                    id="mergeResultsA"
+                    class="merge-song-results"
+                ></div>
+
+                <div
+                    id="selectedA"
+                    class="merge-selected"
+                ></div>
+
+            </div>
+
+
+            <div class="merge-song">
+
+                <h3>Song B</h3>
+
+                <input
+                    id="mergeSearchB"
+                    type="text"
+                    placeholder="Search second song..."
+                >
+
+                <div
+                    id="mergeResultsB"
+                    class="merge-song-results"
+                ></div>
+
+                <div
+                    id="selectedB"
+                    class="merge-selected"
+                ></div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <p>
+                    Merge processing will require properly licensed
+                    audio and lyrics sources. This interface prepares
+                    the workflow; it does not claim access to
+                    full copyrighted tracks.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         NOW PLAYING
+    ========================== -->
+
+    <div id="playerBar">
+
+        <div class="player-song">
+
+            <img
+                id="playerArt"
+                class="player-art"
+                src=""
+                alt="Now playing"
+            >
+
+            <div class="player-text">
+
+                <div
+                    id="playerTitle"
+                    class="player-title"
+                >
+                    Nothing playing
+                </div>
+
+                <div
+                    id="playerArtist"
+                    class="player-artist"
+                >
+                    —
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="player-center">
+
+            <div class="player-controls">
+
+                <button
+                    id="previousButton"
+                    class="player-control"
+                    type="button"
+                    title="Previous"
+                >
+                    ⏮
+                </button>
+
+                <button
+                    id="playerPlay"
+                    class="player-control player-play"
+                    type="button"
+                    title="Play/Pause"
+                >
+                    ▶
+                </button>
+
+                <button
+                    id="nextButton"
+                    class="player-control"
+                    type="button"
+                    title="Next"
+                >
+                    ⏭
+                </button>
+
+            </div>
+
+
+            <div class="progress-row">
+
+                <span
+                    id="currentTime"
+                    class="time"
+                >
+                    0:00
+                </span>
+
+                <input
+                    id="progressBar"
+                    type="range"
+                    min="0"
+                    max="100"
+                    value="0"
+                    step="0.1"
+                >
+
+                <span
+                    id="duration"
+                    class="time"
+                >
+                    0:00
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="player-right">
+
+            <button
+                id="likeButton"
+                class="icon-button"
+                type="button"
+                title="Like"
+            >
+                ♡
+            </button>
+
+            <button
+                id="queueButton"
+                class="icon-button"
+                type="button"
+                title="Queue"
+            >
+                ☷
+            </button>
+
+            <button
+                id="moreButton"
+                class="icon-button"
+                type="button"
+                title="More"
+            >
+                ⋯
+            </button>
+
+            <input
+                id="volumeControl"
+                class="volume"
+                type="range"
+                min="0"
+                max="1"
+                value="0.8"
+                step="0.01"
+                title="Volume"
+            >
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         TOAST
+    ========================== -->
+
+    <div id="toast"></div>
+
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>
